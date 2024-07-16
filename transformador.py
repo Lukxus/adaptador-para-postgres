@@ -122,7 +122,16 @@ all_inserts = (
     campeonatos_inserts + times_inserts + mapa_inserts + partida_inserts + rounds_inserts + jogadores_and_rounds_jogador_inserts
 )
 
-# Salvar os inserts em um arquivo SQL com codificação utf-8
-with open('inserts.sql', 'w', encoding='utf-8') as f:
-    for insert in all_inserts:
-        f.write(insert + '\n')
+# Função para dividir os comandos SQL em vários arquivos
+def save_in_batches(inserts, batch_size, base_filename):
+    total_inserts = len(inserts)
+    for i in range(0, total_inserts, batch_size):
+        batch_inserts = inserts[i:i + batch_size]
+        filename = f"{base_filename}_part_{i//batch_size + 1}.sql"
+        with open(filename, 'w', encoding='utf-8') as f:
+            for insert in batch_inserts:
+                f.write(insert + '\n')
+
+# Salvar os inserts em arquivos SQL menores com codificação utf-8
+# Ajuste o batch_size para reduzir o número de arquivos
+save_in_batches(all_inserts, 300000, 'inserts')
