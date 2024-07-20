@@ -1,75 +1,72 @@
--- Script para criar as tabelas
-
--- Tabela Campeonatos
 CREATE TABLE Campeonatos (
     ID SERIAL PRIMARY KEY,
-    Nome VARCHAR(255) NOT NULL
+    Nome VARCHAR(255) NOT NULL,
+    Especificacao VARCHAR(255),
+    UNIQUE (Nome, Especificacao)  -- Adiciona chave única
 );
 
--- Tabela Times
 CREATE TABLE Times (
     ID SERIAL PRIMARY KEY,
-    Nome VARCHAR(255) NOT NULL
+    Nome VARCHAR(255) NOT NULL,
+    UNIQUE (Nome)  -- Adiciona chave única
 );
 
--- Tabela Mapa
-CREATE TABLE Mapa (
+CREATE TABLE Sequencia_Partida (
     ID SERIAL PRIMARY KEY,
-    Nome VARCHAR(255) NOT NULL
+    Campeonato INT NOT NULL,
+    Data TIMESTAMP NOT NULL,
+    Patch VARCHAR(255) NOT NULL,
+    Tipo INT NOT NULL,
+    ID_time1 INT NOT NULL,
+    ID_time2 INT NOT NULL,
+    URL VARCHAR(255),
+    FOREIGN KEY (Campeonato) REFERENCES Campeonatos(ID),
+    FOREIGN KEY (ID_time1) REFERENCES Times(ID),
+    FOREIGN KEY (ID_time2) REFERENCES Times(ID)
 );
 
--- Tabela Partida
 CREATE TABLE Partida (
     ID SERIAL PRIMARY KEY,
-    Campeonato INT,
-    Data TIMESTAMP NOT NULL,
-    Patch VARCHAR(50) NOT NULL,
-    Tipo VARCHAR(255) NOT NULL,
-    FOREIGN KEY (Campeonato) REFERENCES Campeonatos(ID)
+    ID_sequencia_partida INT NOT NULL,
+    Mapa VARCHAR(255) NOT NULL,
+    ID_time_vencedor INT,
+    FOREIGN KEY (ID_sequencia_partida) REFERENCES Sequencia_Partida(ID),
+    FOREIGN KEY (ID_time_vencedor) REFERENCES Times(ID)
 );
 
--- Tabela Rounds
-CREATE TABLE Rounds (
-    ID SERIAL PRIMARY KEY,
-    ID_Mapa INT,
-    FOREIGN KEY (ID_Mapa) REFERENCES Mapa(ID)
-);
 
--- Tabela Rounds_Partida
 CREATE TABLE Rounds_Partida (
     ID SERIAL PRIMARY KEY,
-    ID_partida INT,
-    ID_round INT,
-    FOREIGN KEY (ID_partida) REFERENCES Partida(ID),
-    FOREIGN KEY (ID_round) REFERENCES Rounds(ID)
+    ID_partida INT NOT NULL,
+    Lista_de_resultados TEXT NOT NULL,
+    FOREIGN KEY (ID_partida) REFERENCES Partida(ID)
 );
 
--- Tabela Jogadores
 CREATE TABLE Jogadores (
     ID SERIAL PRIMARY KEY,
     Nome VARCHAR(255) NOT NULL,
-    ID_time INT,
-    FOREIGN KEY (ID_time) REFERENCES Times(ID)
+    ID_time INT NOT NULL,
+    FOREIGN KEY (ID_time) REFERENCES Times(ID),
+    UNIQUE (Nome, ID_time)  -- Adiciona chave única
 );
 
--- Tabela Agente
 CREATE TABLE Agente (
     ID SERIAL PRIMARY KEY,
-    Nome VARCHAR(255) NOT NULL
+    Nome VARCHAR(255) NOT NULL,
+    UNIQUE (Nome)  -- Adiciona chave única
 );
 
--- Tabela Rounds_Jogador
-CREATE TABLE Rounds_Jogador (
+CREATE TABLE Partida_Jogador (
     ID SERIAL PRIMARY KEY,
-    ID_jogador INT,
-    ID_round INT,
+    ID_partida INT NOT NULL,
+    ID_jogador INT NOT NULL,
     ID_agente INT,
     R_defesa INT,
     R_ataque INT,
     R_geral INT,
-    ACS_defesa VARCHAR(10),
-    ACS_ataque VARCHAR(10),
-    ACS_geral VARCHAR(10),
+    ACS_defesa INT,
+    ACS_ataque INT,
+    ACS_geral INT,
     K_defesa INT,
     K_ataque INT,
     K_geral INT,
@@ -79,28 +76,28 @@ CREATE TABLE Rounds_Jogador (
     A_defesa INT,
     A_ataque INT,
     A_geral INT,
-    KDA_+/-_defesa VARCHAR(10),
-    KDA_+/-_ataque VARCHAR(10),
-    KDA_+/-_geral VARCHAR(10),
-    KAST_defesa VARCHAR(10),
-    KAST_ataque VARCHAR(10),
-    KAST_geral VARCHAR(10),
-    ADR_defesa VARCHAR(10),
-    ADR_ataque VARCHAR(10),
-    ADR_geral VARCHAR(10),
-    HS%_defesa VARCHAR(10),
-    HS%_ataque VARCHAR(10),
-    HS%_geral VARCHAR(10),
+    KDA_defesa FLOAT,
+    KDA_ataque FLOAT,
+    KDA_geral FLOAT,
+    KAST_defesa FLOAT,
+    KAST_ataque FLOAT,
+    KAST_geral FLOAT,
+    ADR_defesa FLOAT,
+    ADR_ataque FLOAT,
+    ADR_geral FLOAT,
+    HS_defesa FLOAT,
+    HS_ataque FLOAT,
+    HS_geral FLOAT,
     FK_defesa INT,
     FK_ataque INT,
     FK_geral INT,
-    FD_defesa VARCHAR(10),
-    FD_ataque VARCHAR(10),
-    FD_geral VARCHAR(10),
-    FKFD+/-_defesa VARCHAR(10),
-    FKFD+/-_ataque VARCHAR(10),
-    FKFD+/-_geral VARCHAR(10),
+    FD_defesa INT,
+    FD_ataque INT,
+    FD_geral INT,
+    FKFD_defesa FLOAT,
+    FKFD_ataque FLOAT,
+    FKFD_geral FLOAT,
+    FOREIGN KEY (ID_partida) REFERENCES Partida(ID),
     FOREIGN KEY (ID_jogador) REFERENCES Jogadores(ID),
-    FOREIGN KEY (ID_round) REFERENCES Rounds(ID),
     FOREIGN KEY (ID_agente) REFERENCES Agente(ID)
 );
