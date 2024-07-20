@@ -19,6 +19,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s:%(message)s",
 )
 
+
 # Função para conectar ao banco de dados
 def connect_db():
     try:
@@ -36,6 +37,7 @@ def connect_db():
         logging.error(f"Error connecting to the database: {e}")
         raise
 
+
 # Função para executar comandos SQL em lotes com transações
 def execute_sql_in_batches(conn, inserts, batch_size):
     with conn.cursor() as cursor:
@@ -52,16 +54,20 @@ def execute_sql_in_batches(conn, inserts, batch_size):
                 logging.error(f"Error executing batch {i // batch_size + 1}: {str(e)}")
                 raise
 
+
 # Carregar o arquivo CSV
 file_path = r"D:\\Documents\\vlrcorte\\dados.csv"
 df = pd.read_csv(file_path)
 
+
 def extract_patch_info(text):
+    # Expressão regular para capturar a palavra "Patch" seguida por um número com qualquer quantidade de dígitos antes e depois do ponto decimal
     match = re.search(r"Patch (\d+(\.\d+)?)", text)
     if match:
-        return match.group(0)
+        return match.group(0)  # Retorna a correspondência inteira "Patch X.X"
     else:
         return None
+
 
 def insereCampeonato(conn, campeonatoLista):
     id_campeonato = ""
@@ -79,23 +85,55 @@ def insereCampeonato(conn, campeonatoLista):
             cursor.execute("COMMIT;")
             if result:
                 id_campeonato = result[0]
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing campeonato insert: {campeonatoLista} : {str(e)}")
+            logging.error(
+                f"Error executing campeonato insert: {(campeonatoLista[0], campeonatoLista[1])} : {str(e)}"
+            )
             raise
     return id_campeonato
 
+
+insert_statements = []
+
+
 def transformaRounds(rounds):
     lista = ast.literal_eval(rounds)
+    # print(dicionario)
     return lista
 
+
+"""
+EQUIPE1DESARMA = 1
+EQUIPE1DETONA = 2
+EQUIPE1ELIMINA = 3
+EQUIPE1TEMPO = 4
+EQUIPE2DESARMA = 5
+EQUIPE2DETONA = 6
+EQUIPE2ELIMINA = 7
+EQUIPE2TEMPO = 8
+"""
+
+
 def criaLabelVencedor(rounds_lista):
-    timeUm = sum(1 for round in rounds_lista if round <= 4)
-    timeDois = sum(1 for round in rounds_lista if round > 4)
-    return "TIME1" if timeUm > timeDois else "TIME2"
+    timeUm = 0
+    timeDois = 0
+    for round in rounds_lista:
+        if round <= 4:
+            timeUm += 1
+        else:
+            timeDois += 1
+    # print(f"Time 1: {timeUm}")
+    # print(f"Time 2: {timeDois}")
+    if timeUm > timeDois:
+        return "TIME1"
+    else:
+        return "TIME2"
+
 
 def insereTimes(conn, time):
-    id_time = ""
+    id_campeonato = ""
     query = (
         "INSERT INTO Times (Nome) VALUES (%s) "
         "ON CONFLICT (Nome) DO UPDATE SET Nome = EXCLUDED.Nome "
@@ -109,14 +147,18 @@ def insereTimes(conn, time):
             result = cursor.fetchone()
             cursor.execute("COMMIT;")
             if result:
-                id_time = result[0]
+                id_campeonato = result[0]
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing time insert: {time} : {str(e)}")
+            logging.error(f"Error executing time insert: {(time)} : {str(e)}")
             raise
-    return id_time
+    return id_campeonato
 
-def insereSequenciaPartidas(conn, campeonato, data, patch, tipo, id_time1, id_time2, url):
+
+def insereSequenciaPartidas(
+    conn, campeonato, data, patch, tipo, id_time1, id_time2, url
+):
     id_sequencia_partida = None
     query = (
         "INSERT INTO Sequencia_Partida (Campeonato, Data, Patch, Tipo, ID_time1, ID_time2, URL) "
@@ -132,11 +174,15 @@ def insereSequenciaPartidas(conn, campeonato, data, patch, tipo, id_time1, id_ti
             cursor.execute("COMMIT;")
             if result:
                 id_sequencia_partida = result[0]
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing sequencia_partida insert: {(campeonato, data, patch, tipo, id_time1, id_time2, url)} : {str(e)}")
+            logging.error(
+                f"Error executing sequencia_partida insert: {(campeonato, data, patch, tipo, id_time1, id_time2, url)} : {str(e)}"
+            )
             raise
     return id_sequencia_partida
+
 
 def inserePartida(conn, id_sequencia_partida, mapa, id_time_vencedor):
     id_partida = None
@@ -154,15 +200,27 @@ def inserePartida(conn, id_sequencia_partida, mapa, id_time_vencedor):
             cursor.execute("COMMIT;")
             if result:
                 id_partida = result[0]
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing partida insert: {(id_sequencia_partida, mapa, id_time_vencedor)} : {str(e)}")
+            logging.error(
+                f"Error executing partida insert: {(id_sequencia_partida, mapa, id_time_vencedor)} : {str(e)}"
+            )
             raise
     return id_partida
 
+
+def transformaRounds(rounds):
+    lista = ast.literal_eval(rounds)
+    # print(dicionario)
+    return lista
+
+
 def trataEstatisiticas(estatisticas):
     dicionario = ast.literal_eval(estatisticas)
+    # print(dicionario)
     return dicionario
+
 
 def insereRoundsPartida(conn, id_partida, lista_de_resultados):
     id_round_partida = None
@@ -180,11 +238,15 @@ def insereRoundsPartida(conn, id_partida, lista_de_resultados):
             cursor.execute("COMMIT;")
             if result:
                 id_round_partida = result[0]
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing rounds_partida insert: {(id_partida, lista_de_resultados)} : {str(e)}")
+            logging.error(
+                f"Error executing rounds_partida insert: {(id_partida, lista_de_resultados)} : {str(e)}"
+            )
             raise
     return id_round_partida
+
 
 def insereJogador(conn, nome, id_time):
     id_jogador = None
@@ -212,16 +274,24 @@ def insereJogador(conn, nome, id_time):
                 if result:
                     id_jogador = result[0]
             cursor.execute("COMMIT;")
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing jogador insert: {(nome, id_time)} : {str(e)}")
+            logging.error(
+                f"Error executing jogador insert: {(nome, id_time)} : {str(e)}"
+            )
             raise
     return id_jogador
+
 
 def removeTimeDoNome(name):
     if name:
         ultimo_espaco = name.rfind(" ")
-        return name[:ultimo_espaco] if ultimo_espaco != -1 else name
+        if ultimo_espaco != -1:
+            return name[:ultimo_espaco]
+        else:
+            return name
+
 
 def inserePartidaJogador(conn, id_partida, id_jogador, id_agente, stats):
     def get_stat_value(stat_dict, key, is_float=False):
@@ -230,12 +300,14 @@ def inserePartidaJogador(conn, id_partida, id_jogador, id_agente, stats):
             return None
         if isinstance(value, str) and value.endswith("%"):
             try:
-                return float(value.rstrip("%")) / 100
+                return float(value.rstrip("%")) / 100  # Convertendo para decimal
             except ValueError:
                 return None
         if isinstance(value, str) and (value.startswith("+") or value.startswith("-")):
             try:
-                return float(value) if is_float else int(value)
+                return (
+                    float(value) if is_float else int(value)
+                )  # Convertendo para número
             except ValueError:
                 return None
         try:
@@ -313,6 +385,7 @@ def inserePartidaJogador(conn, id_partida, id_jogador, id_agente, stats):
         get_stat_value(stats.get("fkfd+-", {}), "geral", is_float=True),
     )
 
+    # Adicionando logs para depuração
     logging.info(f"Params for inserePartidaJogador: {params}")
 
     with conn.cursor() as cursor:
@@ -322,25 +395,27 @@ def inserePartidaJogador(conn, id_partida, id_jogador, id_agente, stats):
             result = cursor.fetchone()
             cursor.execute("COMMIT;")
             return result[0] if result else None
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
             logging.error(f"Error executing partida_jogador insert: {stats} : {str(e)}")
             raise
+
 
 def geraScript(dataframe, conn):
     for index, row in df.iterrows():
         # CAMPEONATOS
         campeonato_completo = ast.literal_eval(row["campeonato"])
         id_campeonato = insereCampeonato(conn, campeonato_completo)
-        logging.info(f"ID camp: {id_campeonato}")
+        print(f"ID camp: {id_campeonato}")
 
         # TIMES
         primeiroTime = row["nomePrimeiroTime"]
         segundoTime = row["nomeSegundoTime"]
         id_time_um = insereTimes(conn, primeiroTime)
         id_time_dois = insereTimes(conn, segundoTime)
-        logging.info(f"id_time_um: {id_time_um}")
-        logging.info(f"id_time_dois: {id_time_dois}")
+        print(id_time_um)
+        print(id_time_dois)
 
         # SEQUENCIA PARTIDA
         url = row["url"]
@@ -359,43 +434,66 @@ def geraScript(dataframe, conn):
             id_time_dois,
             url,
         )
-        logging.info(f"id_seq_partida: {id_seq_partida}")
+        print(f"id da sp:{id_seq_partida}")
 
         mapas_partidas = transformaRounds(row["mapas"])
         rounds_partidas = transformaRounds(row["rounds"])
+
         estatistica_partidas_tratadas = trataEstatisiticas(row["estatisticas"])
+        print(mapas_partidas)
+        print(rounds_partidas)
 
         for i in range(0, len(estatistica_partidas_tratadas), 2):
             rounds_partida = rounds_partidas[i // 2]
             vencedor_partida = criaLabelVencedor(rounds_partida)
             mapa_partida = mapas_partidas[i // 2]
-            id_time_vencedor = id_time_um if vencedor_partida == "TIME1" else id_time_dois
+            id_time_vencedor = None
+            if vencedor_partida == "TIME1":
+                id_time_vencedor = id_time_um
+            else:
+                id_time_vencedor = id_time_dois
 
             # PARTIDA
-            id_partida = inserePartida(conn, id_seq_partida, mapa_partida, id_time_vencedor)
-            logging.info(f"id_partida: {id_partida}")
+            id_partida = inserePartida(
+                conn, id_seq_partida, mapa_partida, id_time_vencedor
+            )
 
             # ROUND PARTIDA
             id_round_partida = insereRoundsPartida(conn, id_partida, rounds_partida)
-            logging.info(f"id_round_partida: {id_round_partida}")
+
+            print(id_partida)
+            print(id_round_partida)
 
             # Acessando TIME 1
             for j in estatistica_partidas_tratadas[i]:
                 nomeJogador = removeTimeDoNome(j["name"])
-                logging.info(f"nomeJogador: {nomeJogador}")
+                print(nomeJogador)
                 id_jogador = insereJogador(conn, nomeJogador, id_time_um)
-                logging.info(f"id_jogador: {id_jogador}")
+                print(f"id jogador: {id_jogador}")
 
                 id_agente = insereAgente(conn, j["agente"])
-                logging.info(f"id_agente: {id_agente}")
+                print(f"id agente: {id_agente}")
 
-                logging.info(j)
+                print(j)
                 id_partida_jogador = inserePartidaJogador(
                     conn, id_partida, id_jogador, id_agente, j
                 )
-                logging.info(f"id_partida_jogador: {id_partida_jogador}")
+                print(f"id partida jogador: {id_partida_jogador}")
+
+            # Acessando TIME 2
+            # for j in estatistica_partidas_tratadas[i + 1]:
+            #     nomeJogador = removeTimeDoNome(j["name"])
+            #     id_jogador = insereJogador(conn, nomeJogador, id_time_dois)
+            #     print(f"id jogador: {id_jogador}")
+
+            #     id_agente = insereAgente(conn, j["agente"])
+            #     print(f"id agente: {id_agente}")
+
+            #     id_partida_jogador = inserePartidaJogador(conn, id_partida, id_jogador, id_agente, j)
+            #     print(f"id partida jogador: {id_partida_jogador}")
 
         break
+
 
 def insereAgente(conn, nome):
     id_agente = None
@@ -419,11 +517,13 @@ def insereAgente(conn, nome):
                 if result:
                     id_agente = result[0]
             cursor.execute("COMMIT;")
+
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing agente insert: {nome} : {str(e)}")
+            logging.error(f"Error executing agente insert: {(nome)} : {str(e)}")
             raise
     return id_agente
+
 
 def executaScript():
     conn = connect_db()
@@ -432,4 +532,5 @@ def executaScript():
     finally:
         conn.close()
 
-executaScript()
+
+all_inserts = executaScript()
