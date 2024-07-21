@@ -1,1 +1,29 @@
-inserts.sql
+# Ambientes virtuais
+venv/
+.env/
+
+# Arquivos de compilação
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configurações do editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.swp
+*.bak
+*.tmp
+*.orig
+*.~lock.*
+
+# Arquivos de banco de dados
+*.sqlite3
+
+# Arquivos gerados pelo sistema operacional
+.DS_Store
+Thumbs.db
