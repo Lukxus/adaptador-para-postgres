@@ -71,6 +71,8 @@ class Inserter:
             value = dictionary.get(key, default)
             if value in [None, '']:
                 return default
+            elif "," in value:
+                value = value.replace(",", "")
             return int(value)
 
         def safe_get_float(dictionary, key, default=-999.0):
