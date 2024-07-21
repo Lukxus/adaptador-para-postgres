@@ -292,114 +292,76 @@ def removeTimeDoNome(name):
         else:
             return name
 
+def inserePartidaJogador(conn, id_partida, id_jogador, agente, estatisticas):
+    id_partida_jogador = None
+    
+    # Função para tratar valores que podem ser None ou strings vazias
+    def safe_get_int(dictionary, key, default=-999):
+        value = dictionary.get(key, default)
+        if value in [None, '']:
+            return default
+        return int(value)
+    
+    def safe_get_float(dictionary, key, default=-999.0):
+        value = dictionary.get(key, default)
+        if value in [None, '']:
+            return default
+        return float(value)
+    
+    def safe_get_simbol(dictionary, key, default=-999.0):
+        value = dictionary.get(key, default)
+        if value in [None, '']:
+            return default
+        elif value in ["+", "-"]:
+            return int(value)
+        elif value in ['%']:
+            return int(value[:-1])
+        return value
+    
+    
 
-def inserePartidaJogador(conn, id_partida, id_jogador, id_agente, stats):
-    def get_stat_value(stat_dict, key, is_float=False):
-        value = stat_dict.get(key)
-        if value in [None, "", "None"]:
-            return None
-        if isinstance(value, str) and value.endswith("%"):
-            try:
-                return float(value.rstrip("%")) / 100  # Convertendo para decimal
-            except ValueError:
-                return None
-        if isinstance(value, str) and (value.startswith("+") or value.startswith("-")):
-            try:
-                return (
-                    float(value) if is_float else int(value)
-                )  # Convertendo para número
-            except ValueError:
-                return None
-        try:
-            return float(value) if is_float else int(value)
-        except ValueError:
-            return None
-
-    query = """
-        INSERT INTO Partida_Jogador (
-            ID_partida, ID_jogador, ID_agente,
-            R_defesa, R_ataque, R_geral,
-            ACS_defesa, ACS_ataque, ACS_geral,
-            K_defesa, K_ataque, K_geral,
-            D_defesa, D_ataque, D_geral,
-            A_defesa, A_ataque, A_geral,
-            KDA_defesa, KDA_ataque, KDA_geral,
-            KAST_defesa, KAST_ataque, KAST_geral,
-            ADR_defesa, ADR_ataque, ADR_geral,
-            HS_defesa, HS_ataque, HS_geral,
-            FK_defesa, FK_ataque, FK_geral,
-            FD_defesa, FD_ataque, FD_geral,
-            FKFD_defesa, FKFD_ataque, FKFD_geral
-        ) VALUES (
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s,
-            %s, %s, %s
-        ) RETURNING ID;
-    """
-    params = (
-        id_partida,
-        id_jogador,
-        id_agente,
-        get_stat_value(stats.get("r", {}), "defesa"),
-        get_stat_value(stats.get("r", {}), "ataque"),
-        get_stat_value(stats.get("r", {}), "geral"),
-        get_stat_value(stats.get("acs", {}), "defesa"),
-        get_stat_value(stats.get("acs", {}), "ataque"),
-        get_stat_value(stats.get("acs", {}), "geral"),
-        get_stat_value(stats.get("k", {}), "defesa"),
-        get_stat_value(stats.get("k", {}), "ataque"),
-        get_stat_value(stats.get("k", {}), "geral"),
-        get_stat_value(stats.get("d", {}), "defesa"),
-        get_stat_value(stats.get("d", {}), "ataque"),
-        get_stat_value(stats.get("d", {}), "geral"),
-        get_stat_value(stats.get("a", {}), "defesa"),
-        get_stat_value(stats.get("a", {}), "ataque"),
-        get_stat_value(stats.get("a", {}), "geral"),
-        get_stat_value(stats.get("kda+-", {}), "defesa", is_float=True),
-        get_stat_value(stats.get("kda+-", {}), "ataque", is_float=True),
-        get_stat_value(stats.get("kda+-", {}), "geral", is_float=True),
-        get_stat_value(stats.get("kast", {}), "defesa", is_float=True),
-        get_stat_value(stats.get("kast", {}), "ataque", is_float=True),
-        get_stat_value(stats.get("kast", {}), "geral", is_float=True),
-        get_stat_value(stats.get("adr", {}), "defesa", is_float=True),
-        get_stat_value(stats.get("adr", {}), "ataque", is_float=True),
-        get_stat_value(stats.get("adr", {}), "geral", is_float=True),
-        get_stat_value(stats.get("hs", {}), "defesa", is_float=True),
-        get_stat_value(stats.get("hs", {}), "ataque", is_float=True),
-        get_stat_value(stats.get("hs", {}), "geral", is_float=True),
-        get_stat_value(stats.get("fk", {}), "defesa"),
-        get_stat_value(stats.get("fk", {}), "ataque"),
-        get_stat_value(stats.get("fk", {}), "geral"),
-        get_stat_value(stats.get("fd", {}), "defesa"),
-        get_stat_value(stats.get("fd", {}), "ataque"),
-        get_stat_value(stats.get("fd", {}), "geral"),
-        get_stat_value(stats.get("fkfd+-", {}), "defesa", is_float=True),
-        get_stat_value(stats.get("fkfd+-", {}), "ataque", is_float=True),
-        get_stat_value(stats.get("fkfd+-", {}), "geral", is_float=True),
+    query = (
+        "INSERT INTO Partida_Jogador (ID_partida, ID_jogador, agente, R_defesa, R_ataque, R_geral, ACS_defesa, ACS_ataque, ACS_geral, "
+        "K_defesa, K_ataque, K_geral, D_defesa, D_ataque, D_geral, A_defesa, A_ataque, A_geral, KDA_defesa, KDA_ataque, KDA_geral, "
+        "KAST_defesa, KAST_ataque, KAST_geral, ADR_defesa, ADR_ataque, ADR_geral, HS_defesa, HS_ataque, HS_geral, FK_defesa, FK_ataque, "
+        "FK_geral, FD_defesa, FD_ataque, FD_geral, FKFD_defesa, FKFD_ataque, FKFD_geral) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
+        "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+        "RETURNING ID;",
+        (
+            id_partida, id_jogador, agente,
+            safe_get_float(estatisticas["r"], "defesa"), safe_get_float(estatisticas["r"], "ataque"), safe_get_float(estatisticas["r"], "geral"),
+            safe_get_int(estatisticas["acs"], "defesa"), safe_get_int(estatisticas["acs"], "ataque"), safe_get_int(estatisticas["acs"], "geral"),
+            safe_get_int(estatisticas["k"], "defesa"), safe_get_int(estatisticas["k"], "ataque"), safe_get_int(estatisticas["k"], "geral"),
+            safe_get_int(estatisticas["d"], "defesa"), safe_get_int(estatisticas["d"], "ataque"), safe_get_int(estatisticas["d"], "geral"),
+            safe_get_int(estatisticas["a"], "defesa"), safe_get_int(estatisticas["a"], "ataque"), safe_get_int(estatisticas["a"], "geral"),
+            safe_get_simbol(estatisticas["kda+-"], "defesa"), safe_get_simbol(estatisticas["kda+-"], "ataque"), safe_get_simbol(estatisticas["kda+-"], "geral"),
+            safe_get_simbol(estatisticas["kast"], "defesa"), safe_get_simbol(estatisticas["kast"], "ataque"), safe_get_simbol(estatisticas["kast"], "geral"),
+            safe_get_int(estatisticas["adr"], "defesa"), safe_get_int(estatisticas["adr"], "ataque"), safe_get_int(estatisticas["adr"], "geral"),
+            safe_get_simbol(estatisticas["hs"], "defesa"), safe_get_simbol(estatisticas["hs"], "ataque"), safe_get_simbol(estatisticas["hs"], "geral"),
+            safe_get_int(estatisticas["fk"], "defesa"), safe_get_int(estatisticas["fk"], "ataque"), safe_get_int(estatisticas["fk"], "geral"),
+            safe_get_int(estatisticas["fd"], "defesa"), safe_get_int(estatisticas["fd"], "ataque"), safe_get_int(estatisticas["fd"], "geral"),
+            safe_get_simbol(estatisticas["fkfd+-"], "defesa"), safe_get_simbol(estatisticas["fkfd+-"], "ataque"), safe_get_simbol(estatisticas["fkfd+-"], "geral")
+        )
     )
-
-    # Adicionando logs para depuração
-    logging.info(f"Params for inserePartidaJogador: {params}")
-
     with conn.cursor() as cursor:
         try:
             cursor.execute("BEGIN;")
-            cursor.execute(query, params)
+            cursor.execute(query[0], query[1])
             result = cursor.fetchone()
             cursor.execute("COMMIT;")
-            return result[0] if result else None
+            if result:
+                id_partida_jogador = result[0]
 
         except Exception as e:
             cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing partida_jogador insert: {stats} : {str(e)}")
+            logging.error(
+                f"Error executing partida_jogador insert: {(id_partida, id_jogador, agente, estatisticas)} : {str(e)}"
+            )
             raise
+    return id_partida_jogador
+
+
 
 
 def geraScript(dataframe, conn):
@@ -407,15 +369,15 @@ def geraScript(dataframe, conn):
         # CAMPEONATOS
         campeonato_completo = ast.literal_eval(row["campeonato"])
         id_campeonato = insereCampeonato(conn, campeonato_completo)
-        print(f"ID camp: {id_campeonato}")
+        #print(f"ID camp: {id_campeonato}")
 
         # TIMES
         primeiroTime = row["nomePrimeiroTime"]
         segundoTime = row["nomeSegundoTime"]
         id_time_um = insereTimes(conn, primeiroTime)
         id_time_dois = insereTimes(conn, segundoTime)
-        print(id_time_um)
-        print(id_time_dois)
+        #print(id_time_um)
+        #print(id_time_dois)
 
         # SEQUENCIA PARTIDA
         url = row["url"]
@@ -434,14 +396,14 @@ def geraScript(dataframe, conn):
             id_time_dois,
             url,
         )
-        print(f"id da sp:{id_seq_partida}")
+        #print(f"id da sp:{id_seq_partida}")
 
         mapas_partidas = transformaRounds(row["mapas"])
         rounds_partidas = transformaRounds(row["rounds"])
 
         estatistica_partidas_tratadas = trataEstatisiticas(row["estatisticas"])
-        print(mapas_partidas)
-        print(rounds_partidas)
+        #print(mapas_partidas)
+        #print(rounds_partidas)
 
         for i in range(0, len(estatistica_partidas_tratadas), 2):
             rounds_partida = rounds_partidas[i // 2]
@@ -461,69 +423,38 @@ def geraScript(dataframe, conn):
             # ROUND PARTIDA
             id_round_partida = insereRoundsPartida(conn, id_partida, rounds_partida)
 
-            print(id_partida)
-            print(id_round_partida)
+            #print(id_partida)
+            #print(id_round_partida)
 
             # Acessando TIME 1
             for j in estatistica_partidas_tratadas[i]:
                 nomeJogador = removeTimeDoNome(j["name"])
-                print(nomeJogador)
+                #print(nomeJogador)
                 id_jogador = insereJogador(conn, nomeJogador, id_time_um)
-                print(f"id jogador: {id_jogador}")
+                #print(f"id jogador: {id_jogador}")
 
-                id_agente = insereAgente(conn, j["agente"])
-                print(f"id agente: {id_agente}")
+                # agente = j["agente"]
+                # print(f"id agente: {agente}")
 
-                print(j)
+                #print(j)
                 id_partida_jogador = inserePartidaJogador(
-                    conn, id_partida, id_jogador, id_agente, j
+                    conn, id_partida, id_jogador, j["agente"], j
                 )
-                print(f"id partida jogador: {id_partida_jogador}")
+                #print(f"id partida jogador: {id_partida_jogador}")
 
             # Acessando TIME 2
-            # for j in estatistica_partidas_tratadas[i + 1]:
-            #     nomeJogador = removeTimeDoNome(j["name"])
-            #     id_jogador = insereJogador(conn, nomeJogador, id_time_dois)
-            #     print(f"id jogador: {id_jogador}")
+            for j in estatistica_partidas_tratadas[i + 1]:
+                nomeJogador = removeTimeDoNome(j["name"])
+                id_jogador = insereJogador(conn, nomeJogador, id_time_dois)
+                #print(f"id jogador: {id_jogador}")
 
-            #     id_agente = insereAgente(conn, j["agente"])
-            #     print(f"id agente: {id_agente}")
 
-            #     id_partida_jogador = inserePartidaJogador(conn, id_partida, id_jogador, id_agente, j)
-            #     print(f"id partida jogador: {id_partida_jogador}")
+                id_partida_jogador = inserePartidaJogador(
+                    conn, id_partida, id_jogador, j["agente"], j
+                )
+                #print(f"id partida jogador: {id_partida_jogador}")
 
         break
-
-
-def insereAgente(conn, nome):
-    id_agente = None
-    insert_query = (
-        "INSERT INTO Agente (Nome) VALUES (%s) "
-        "ON CONFLICT (Nome) DO NOTHING "
-        "RETURNING ID;",
-        (nome,),
-    )
-    select_query = ("SELECT ID FROM Agente WHERE Nome = %s;", (nome,))
-    with conn.cursor() as cursor:
-        try:
-            cursor.execute("BEGIN;")
-            cursor.execute(insert_query[0], insert_query[1])
-            result = cursor.fetchone()
-            if result:
-                id_agente = result[0]
-            else:
-                cursor.execute(select_query[0], select_query[1])
-                result = cursor.fetchone()
-                if result:
-                    id_agente = result[0]
-            cursor.execute("COMMIT;")
-
-        except Exception as e:
-            cursor.execute("ROLLBACK;")
-            logging.error(f"Error executing agente insert: {(nome)} : {str(e)}")
-            raise
-    return id_agente
-
 
 def executaScript():
     conn = connect_db()

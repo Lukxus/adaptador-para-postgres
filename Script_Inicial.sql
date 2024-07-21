@@ -34,7 +34,6 @@ CREATE TABLE Partida (
     FOREIGN KEY (ID_time_vencedor) REFERENCES Times(ID)
 );
 
-
 CREATE TABLE Rounds_Partida (
     ID SERIAL PRIMARY KEY,
     ID_partida INT NOT NULL,
@@ -50,17 +49,11 @@ CREATE TABLE Jogadores (
     UNIQUE (Nome, ID_time)  -- Adiciona chave única
 );
 
-CREATE TABLE Agente (
-    ID SERIAL PRIMARY KEY,
-    Nome VARCHAR(255) NOT NULL,
-    UNIQUE (Nome)  -- Adiciona chave única
-);
-
 CREATE TABLE Partida_Jogador (
     ID SERIAL PRIMARY KEY,
     ID_partida INT NOT NULL,
     ID_jogador INT NOT NULL,
-    ID_agente INT,
+    agente VARCHAR(255),  -- Adiciona o agente como um atributo
     R_defesa INT,
     R_ataque INT,
     R_geral INT,
@@ -76,9 +69,9 @@ CREATE TABLE Partida_Jogador (
     A_defesa INT,
     A_ataque INT,
     A_geral INT,
-    KDA_defesa FLOAT,
-    KDA_ataque FLOAT,
-    KDA_geral FLOAT,
+    KDA_defesa INT,
+    KDA_ataque INT,
+    KDA_geral INT,
     KAST_defesa FLOAT,
     KAST_ataque FLOAT,
     KAST_geral FLOAT,
@@ -94,10 +87,9 @@ CREATE TABLE Partida_Jogador (
     FD_defesa INT,
     FD_ataque INT,
     FD_geral INT,
-    FKFD_defesa FLOAT,
-    FKFD_ataque FLOAT,
-    FKFD_geral FLOAT,
+    FKFD_defesa INT,
+    FKFD_ataque INT,
+    FKFD_geral INT,
     FOREIGN KEY (ID_partida) REFERENCES Partida(ID),
-    FOREIGN KEY (ID_jogador) REFERENCES Jogadores(ID),
-    FOREIGN KEY (ID_agente) REFERENCES Agente(ID)
+    FOREIGN KEY (ID_jogador) REFERENCES Jogadores(ID)
 );
