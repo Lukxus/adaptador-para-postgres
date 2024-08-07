@@ -1,11 +1,11 @@
-CREATE TABLE Campeonatos (
+CREATE TABLE  (
     ID SERIAL PRIMARY KEY,
     Nome VARCHAR(255) NOT NULL,
     Especificacao VARCHAR(255),
     UNIQUE (Nome, Especificacao)  -- Adiciona chave única
 );
 
-CREATE TABLE Times (
+CREATE TABLE Time (
     ID SERIAL PRIMARY KEY,
     Nome VARCHAR(255) NOT NULL,
     UNIQUE (Nome)  -- Adiciona chave única
@@ -20,9 +20,9 @@ CREATE TABLE Sequencia_Partida (
     ID_time1 INT NOT NULL,
     ID_time2 INT NOT NULL,
     URL VARCHAR(255),
-    FOREIGN KEY (Campeonato) REFERENCES Campeonatos(ID),
-    FOREIGN KEY (ID_time1) REFERENCES Times(ID),
-    FOREIGN KEY (ID_time2) REFERENCES Times(ID)
+    FOREIGN KEY (Campeonato) REFERENCES Campeonato(ID),
+    FOREIGN KEY (ID_time1) REFERENCES Time(ID),
+    FOREIGN KEY (ID_time2) REFERENCES Time(ID)
 );
 
 CREATE TABLE Partida (
@@ -31,7 +31,7 @@ CREATE TABLE Partida (
     Mapa VARCHAR(255) NOT NULL,
     ID_time_vencedor INT,
     FOREIGN KEY (ID_sequencia_partida) REFERENCES Sequencia_Partida(ID),
-    FOREIGN KEY (ID_time_vencedor) REFERENCES Times(ID)
+    FOREIGN KEY (ID_time_vencedor) REFERENCES Time(ID)
 );
 
 CREATE TABLE Rounds_Partida (
@@ -41,11 +41,11 @@ CREATE TABLE Rounds_Partida (
     FOREIGN KEY (ID_partida) REFERENCES Partida(ID)
 );
 
-CREATE TABLE Jogadores (
+CREATE TABLE Jogador (
     ID SERIAL PRIMARY KEY,
     Nome VARCHAR(255) NOT NULL,
     ID_time INT NOT NULL,
-    FOREIGN KEY (ID_time) REFERENCES Times(ID),
+    FOREIGN KEY (ID_time) REFERENCES Time(ID),
     UNIQUE (Nome, ID_time)  -- Adiciona chave única
 );
 
@@ -91,5 +91,5 @@ CREATE TABLE Partida_Jogador (
     FKFD_ataque INT,
     FKFD_geral INT,
     FOREIGN KEY (ID_partida) REFERENCES Partida(ID),
-    FOREIGN KEY (ID_jogador) REFERENCES Jogadores(ID)
+    FOREIGN KEY (ID_jogador) REFERENCES Jogador(ID)
 );

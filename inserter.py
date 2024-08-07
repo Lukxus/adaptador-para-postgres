@@ -6,7 +6,7 @@ class Inserter:
 
     def insere_campeonato(self, campeonatoLista):
         query = (
-            "INSERT INTO Campeonatos (Nome, Especificacao) VALUES (%s, %s) "
+            "INSERT INTO Campeonato (Nome, Especificacao) VALUES (%s, %s) "
             "ON CONFLICT (Nome, Especificacao) DO UPDATE SET Nome = EXCLUDED.Nome "
             "RETURNING ID;",
             (campeonatoLista[0], campeonatoLista[1]),
@@ -15,7 +15,7 @@ class Inserter:
 
     def insere_times(self, time):
         query = (
-            "INSERT INTO Times (Nome) VALUES (%s) "
+            "INSERT INTO Time (Nome) VALUES (%s) "
             "ON CONFLICT (Nome) DO UPDATE SET Nome = EXCLUDED.Nome "
             "RETURNING ID;",
             (time,),
@@ -24,7 +24,7 @@ class Inserter:
 
     def insere_sequencia_partidas(self, campeonato, data, patch, tipo, id_time1, id_time2, url):
         query = (
-            "INSERT INTO Sequencia_Partida (Campeonato, Data, Patch, Tipo, ID_time1, ID_time2, URL) "
+            "INSERT INTO Sequencia_Partida (Campeonato_id, Data, Patch, Tipo, time1_id, time2_id, URL) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s) "
             "RETURNING ID;",
             (campeonato, data, patch, tipo, id_time1, id_time2, url),
@@ -33,7 +33,7 @@ class Inserter:
 
     def insere_partida(self, id_sequencia_partida, mapa, id_time_vencedor):
         query = (
-            "INSERT INTO Partida (ID_sequencia_partida, Mapa, ID_time_vencedor) "
+            "INSERT INTO Partida (sequencia_partida_id, Mapa, time_vencedor_id) "
             "VALUES (%s, %s, %s) "
             "RETURNING ID;",
             (id_sequencia_partida, mapa, id_time_vencedor),
@@ -42,7 +42,7 @@ class Inserter:
 
     def insere_rounds_partida(self, id_partida, lista_de_resultados):
         query = (
-            "INSERT INTO Rounds_Partida (ID_partida, Lista_de_resultados) "
+            "INSERT INTO Rounds_Partida (partida_id, Lista_de_resultados) "
             "VALUES (%s, %s) "
             "RETURNING ID;",
             (id_partida, lista_de_resultados),
@@ -51,14 +51,14 @@ class Inserter:
 
     def insere_jogador(self, nome, id_time):
         insert_query = (
-            "INSERT INTO Jogadores (Nome, ID_time) "
+            "INSERT INTO Jogador (Nome, time_id) "
             "VALUES (%s, %s) "
-            "ON CONFLICT (Nome, ID_time) DO NOTHING "
+            "ON CONFLICT (Nome, time_id) DO NOTHING "
             "RETURNING ID;",
             (nome, id_time),
         )
         select_query = (
-            "SELECT ID FROM Jogadores WHERE Nome = %s AND ID_time = %s;",
+            "SELECT ID FROM Jogador WHERE Nome = %s AND time_id = %s;",
             (nome, id_time),
         )
         return self._execute_insert(insert_query, select_query)
@@ -90,7 +90,7 @@ class Inserter:
             return int(value)
 
         query = (
-            "INSERT INTO Partida_Jogador (ID_partida, ID_jogador, agente, R_defesa, R_ataque, R_geral, ACS_defesa, ACS_ataque, ACS_geral, "
+            "INSERT INTO Partida_Jogador (partida_id, jogador_id, agente, R_defesa, R_ataque, R_geral, ACS_defesa, ACS_ataque, ACS_geral, "
             "K_defesa, K_ataque, K_geral, D_defesa, D_ataque, D_geral, A_defesa, A_ataque, A_geral, KDA_defesa, KDA_ataque, KDA_geral, "
             "KAST_defesa, KAST_ataque, KAST_geral, ADR_defesa, ADR_ataque, ADR_geral, HS_defesa, HS_ataque, HS_geral, FK_defesa, FK_ataque, "
             "FK_geral, FD_defesa, FD_ataque, FD_geral, FKFD_defesa, FKFD_ataque, FKFD_geral) "
