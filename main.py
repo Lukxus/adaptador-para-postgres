@@ -6,6 +6,7 @@ from config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD
 from database import Database
 from dataprocessor import DataProcessor
 from inserter import Inserter
+from tqdm import tqdm  # Importando a barra de progresso
 
 logging.basicConfig(
     filename="db_inserts.log",
@@ -21,7 +22,7 @@ class ScriptExecutor:
         self.inserter = Inserter(db)
 
     def execute(self):
-        for index, row in self.df.iterrows():
+        for index, row in tqdm(self.df.iterrows(), total=self.df.shape[0], desc="Processing Rows"):
 
             # Partidas com Tipo Incorreto:
             url = row["url"]
