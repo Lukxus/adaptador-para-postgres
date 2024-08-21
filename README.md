@@ -3,9 +3,8 @@ Projeto com objetivo de traduzir para uma estrutura SQL, os inserts necessários
 
 Modelo de dominio do banco
 
-![alt text](<Blank diagram - Page 1 (4).png>)
+![VLR Model de Dominio - Page 1 (1)](https://github.com/user-attachments/assets/a6e682b4-e29b-4fff-a118-5763a4153e5d)
 
-![Blank diagram - Page 1](https://github.com/user-attachments/assets/b3a8d17b-1d82-49ca-b4fc-0a82c9b21efa)
 
 
 # Como subir um banco postgres localmente
