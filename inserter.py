@@ -67,7 +67,7 @@ class Inserter:
         id_partida_jogador = None
 
         # Função para tratar valores que podem ser None ou strings vazias
-        def safe_get_int(dictionary, key, default=-999):
+        def safe_get_int(dictionary, key, default=None):
             value = dictionary.get(key, default)
             if value in [None, '']:
                 return default
@@ -75,13 +75,13 @@ class Inserter:
                 value = value.replace(",", "")
             return int(value)
 
-        def safe_get_float(dictionary, key, default=-999.0):
+        def safe_get_float(dictionary, key, default=None):
             value = dictionary.get(key, default)
             if value in [None, '']:
                 return default
             return float(value)
 
-        def safe_get_simbol(dictionary, key, default=-999.0):
+        def safe_get_simbol(dictionary, key, default=None):
             value = dictionary.get(key, default)
             if value in [None, '']:
                 return default
