@@ -103,12 +103,19 @@ class ScriptExecutor:
                     )
 
 
+def ordenaPelaData(df):
+    """
+    Ordena o DataFrame pela coluna 'date'.
+    """
+    df.sort_values(by='date', inplace=True)
+
 if __name__ == "__main__":
     file_path = r"/Users/luizsaraiva/Downloads/dados.csv"
     df = pd.read_csv(file_path)
     db = Database(DB_HOST, DB_NAME, DB_USER, DB_PASSWORD)
     db.connect()
     try:
+        ordenaPelaData(df)
         executor = ScriptExecutor(db, df)
         executor.execute()
     finally:
