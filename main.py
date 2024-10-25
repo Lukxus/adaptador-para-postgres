@@ -49,7 +49,10 @@ class ScriptExecutor:
             datetime_str = row["date"]
             datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
             tipo_partida = row["tipo_partida"]
-            patch = DataProcessor.extract_patch_info(row["patch"])
+            if pd.isna(row["patch"]):
+                patch = ""
+            else:
+                patch = DataProcessor.extract_patch_info(row["patch"])
 
             id_seq_partida = self.inserter.insere_sequencia_partidas(
                 id_campeonato,
@@ -101,7 +104,7 @@ class ScriptExecutor:
 
 
 if __name__ == "__main__":
-    file_path = r"D:\\Documents\\vlrcorte\\dados.csv"
+    file_path = r"/Users/luizsaraiva/Downloads/dados.csv"
     df = pd.read_csv(file_path)
     db = Database(DB_HOST, DB_NAME, DB_USER, DB_PASSWORD)
     db.connect()
